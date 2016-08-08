@@ -58,12 +58,20 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
         time_create = now
         params = {'node':t[0], 'block':block.name.replace('#','%23')}
         api_sub(params,flags)
-        payload = common.getJson(bufferpath_sub)['dataset']
+        payload = common.getJson(bufferpath_sub)
+        if not payload:
+          toRemove.add(t)
+          continue
+        payload = payload['dataset']
         try:
           time_create = int(payload[0]['block'][0]['subscription'][0]['time_create'])
-        except KeyError:
-          time_create = int(payload[0]['subscription'][0]['time_create'])
-        if time_create-now < threshold*common.sPerDay:
+        except:
+          try:
+            time_create = int(payload[0]['subscription'][0]['time_create'])
+          except:
+            toRemove.add(t)
+            continue
+        if now-time_create < threshold*common.sPerDay:
           toRemove.add(t)
           continue
       for t in toRemove:

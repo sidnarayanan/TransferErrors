@@ -42,7 +42,7 @@ def getJson(fpath):
     with open(fpath) as jsonfile:
       payload = json.load(jsonfile)['phedex']
     return payload
-  except IOError:
+  except:
     return None
 
 class APIHandler():
