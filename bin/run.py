@@ -13,7 +13,6 @@ TE.filterSubscriptions(stuck)
 with open('stuck.pkl','wb') as pklfile:
   pickle.dump(stuck,pklfile)
 
-# print stuck
 for k,v in stuck.iteritems():
   print k
   for bn,b in v.stuckBlocks.iteritems():
