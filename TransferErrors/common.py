@@ -4,6 +4,7 @@ import os
 import json
 
 tmpdir = '/tmp/'
+workdir = os.environ['TRANSFERERRORS']+'/'
 
 siteNames = set([
      'T2_BE_IIHE','T2_ES_IFCA','T2_IT_Pisa','T2_RU_PNPI',
@@ -64,7 +65,7 @@ class APIHandler():
       param_str = '&%s=%s'%(p,str(arg))
       url += param_str
     url += '"'
-    outputflag = '' if self.VERBOSE else ' > /dev/null'
+    outputflag = '' if self.VERBOSE else ' > /dev/null 2>/dev/null'
     cmd = 'wget %s %s %s'%(flags,url,outputflag)
     if self.VERBOSE: print cmd
     os.system(cmd)
@@ -77,6 +78,15 @@ class Site():
     self.averageETA = 0
     self.counter = 0
 
+class Subscription():
+  def __init__(self,site,basis=0,age=0,group=None):
+    self.node = site
+    self.basis = basis
+    self.age = age
+    self.group = group
+  def __str__(self):
+    return 'Subscription(%20s %2i %2i %20s)'%(self.node,self.basis,int(self.age/sPerDay),self.group)
+
 class TMDBDataset():
   def __init__(self,n):
     self.name = n
@@ -85,7 +95,7 @@ class TMDBDataset():
 class TMDBBlock():
   def __init__(self,n):
     self.name = n
-    self.targets = set([]) # tuples ('TX_XXX_XXX',basis)
+    self.targets = set([]) # set of Subscriptions
     self.files = {}
 
 class TMDBFile():
@@ -93,3 +103,4 @@ class TMDBFile():
     self.name = n
     self.missing = {}
     self.complete = []
+
