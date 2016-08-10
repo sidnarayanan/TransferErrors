@@ -27,7 +27,7 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
       datasetname = block['dataset']
       time_create = block['time_create']
       if now-time_create < threshold*common.sPerDay:
-        continue
+        continue 
       try:
         dataset = stuckDatasets['datasetname']
       except KeyError:
@@ -38,6 +38,7 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
       except KeyError:
         stuckBlock = common.TMDBBlock(blockname)
         dataset.stuckBlocks[blockname] = stuckBlock
+      stuckBlock.volume = block['bytes']
       for dest in block['destination']:
         stuckBlock.targets.add(common.Subscription(dest['name'],iB))
 
@@ -155,6 +156,7 @@ def addMissingFiles(stuck,bufferpath=''):
           payload = common.getJson(bufferpath)['block'][0]['file'] # should only get one file back
           for f in payload:
             t.missingfiles.add(f['name'])
+            t.volumemissing += f['bytes']
         except IndexError:
           print 'No missing files found!'
           pprint.pprint(common.getJson(bufferpath))
