@@ -1,26 +1,61 @@
 <html>
 <head><title>Stuck transfers</title>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="style.css">
-<script src="sorttable.js"></script>
-
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
 <br>
 <hr>
 <center>
-<table width="100%" class="sortable"> 
+<table id="tableall" width="100%" cellspacing="0" class="display"> 
+<!-- <table width="100%" class="sortable">  -->
   <col width="50%">
   <col width="19%">
   <col width="9%">
   <col width="9%">
   <col width="9%">
   <col width="5%">
+  <thead>
   <tr>  <th id="left"> Dataset </th>  <th id="left"> Block </th> <th id="left"> Target </th>  <th id="center"> Basis </th>   <th id="center"> Age </th> <th id="center">  </th>     </tr>
+  <tr id="filterrow"> <th id="left"> Dataset </th>  <th id="left"> Block </th> <th id="left"> Target </th>  <th id="center"> Basis </th>   <th id="center"> Age </th> <th id="center">  </th>     </tr>
+  </thead>
+  <tfoot>
+  </tfoot>
+
   <!-- <tr>  <td> /Blah/RunII/AOD </td> <td> #ABCD </td> <td> T4_US_LNS </td> <td> 1 </td> <td> 2 </td> </tr> -->
+  <tbody>
   <!-- Insert newlines here  -->
+  </tbody>
 </table>
 </center>
 <br>
 <hr>
+<script type="text/javascript">
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#tableall thead tr#filterrow th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#tableall').DataTable({
+      "orderCellsTop": true,
+      "pageLength": 50,
+      "searching": false
+    });
+ 
+    // Apply the search
+    $("#tableall thead input").on( 'keyup change', function () {
+        table
+            .column( $(this).parent().index()+':visible' )
+            .search( this.value )
+            .draw();
+    } );
+} );
+</script>
 </body>
 </html>

@@ -5,6 +5,7 @@ import json
 
 tmpdir = '/tmp/'
 workdir = os.environ['TRANSFERERRORS']+'/'
+webdir = os.environ['WEBDIR']+'/'
 
 siteNames = set([
      'T2_BE_IIHE','T2_ES_IFCA','T2_IT_Pisa','T2_RU_PNPI',

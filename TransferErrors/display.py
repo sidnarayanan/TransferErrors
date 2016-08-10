@@ -17,7 +17,7 @@ def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
         newstring = newstring.replace('NODENAME',str(t.node))
         newstring = newstring.replace('BASIS',str(t.basis))
         newstring = newstring.replace('AGE','%.1f'%(t.age/common.sPerDay))
-        newstring = newstring.replace('URL','https://cmsweb.cern.ch/phedex/datasvc/perl/prod/subscriptions?&node=%s&block=%s'%(t.node,blockname.replace('#','%23')))
+        newstring = newstring.replace('URL','https://cmsweb.cern.ch/phedex/datasvc/perl/prod/missingfiles?&node=%s&block=%s'%(t.node,blockname.replace('#','%23')))
         newrows += newstring
 
   with open(templatefilepath) as templatefile:
