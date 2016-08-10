@@ -85,6 +85,7 @@ class Subscription():
     self.basis = basis
     self.age = age
     self.group = group
+    self.missingfiles=set([])
   def __str__(self):
     return 'Subscription(%20s %2i %2i %20s)'%(self.node,self.basis,int(self.age/sPerDay),self.group)
 
@@ -97,7 +98,6 @@ class TMDBBlock():
   def __init__(self,n):
     self.name = n
     self.targets = set([]) # set of Subscriptions
-    self.files = {}
 
 class TMDBFile():
   def __init__(self,n):
