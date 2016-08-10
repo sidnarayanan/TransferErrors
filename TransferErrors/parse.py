@@ -140,6 +140,25 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
     #finally, remove empty datasets
     del stuckDatasets[dsname]
 
+def addMissingFiles(stuck,bufferpath=''):
+  if bufferpath=='':
+    bufferpath = common.tmpdir + 'missingfiles.json'
+  api = common.APIHandler('missingfiles')
+  # api.VERBOSE=True
+  for dsname,ds in stuck.iteritems():
+    for blockname,block in ds.stuckBlocks.iteritems():
+      flags = ' -O %s'%bufferpath
+      for t in block.targets:
+        params = {'node':t.node, 'block':block.name.replace('#','%23')} 
+        api(params,flags)
+        try:
+          payload = common.getJson(bufferpath)['block'][0]['file'] # should only get one file back
+          for f in payload:
+            t.missingfiles.add(f['name'])
+        except IndexError:
+          print 'No missing files found!'
+          pprint.pprint(common.getJson(bufferpath))
+
 
 # def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
 #   if bufferpath=='':

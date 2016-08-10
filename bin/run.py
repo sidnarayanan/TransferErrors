@@ -9,6 +9,7 @@ TE.getSubscriptions()
 
 stuck=TE.parseBlockArrive(threshold=7)
 TE.filterSubscriptions(stuck)
+TE.addMissingFiles(stuck)
 
 with open('stuck.pkl','wb') as pklfile:
   pickle.dump(stuck,pklfile)
