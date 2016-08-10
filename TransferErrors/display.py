@@ -3,7 +3,7 @@
 import common
 
 def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
-  templatestring = '<tr data-hiddenval="HIDDEN"> <td class="details-control"></td>  <td> DATASETNAME </td> <td> BLOCKNAME </td> <td> NODENAME </td> <td> GROUP </td> <td id="center"> BASIS </td> <td id="center"> AGE </td> <td> <a href="URL" target="_blank"> &#8599 </a></tr>\n'
+  templatestring = '<tr data-hiddenval="HIDDEN"> <td class="details-control"></td>  <td> DATASETNAME </td> <td> BLOCKNAME </td> <td> NODENAME </td> <td> GROUP </td> <td id="center"> MISSING </td> <td id="center"> BASIS </td> <td id="center"> AGE </td> <td> <a href="URL" target="_blank"> &#8599 </a></tr>\n'
   newrows = ''
 
   for dsname in sorted(stuckDatasets):
@@ -18,12 +18,14 @@ def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
         newstring = newstring.replace('BASIS',str(t.basis))
         newstring = newstring.replace('AGE','%.1f'%(t.age/common.sPerDay))
         newstring = newstring.replace('GROUP',t.group) 
+        newstring = newstring.replace('MISSING',"%.1f%%"%(100.*t.volumemissing/block.volume)) 
         missingurl = 'https://cmsweb.cern.ch/phedex/datasvc/perl/prod/missingfiles?&node=%s&block=%s'%(t.node,blockname.replace('#','%23'))
         newstring = newstring.replace('URL',missingurl)
 
         missingstring = ''
         for m in t.missingfiles:
           missingstring += '<br>%s'%m
+
 
         newstring = newstring.replace('HIDDEN',missingstring)
         newrows += newstring

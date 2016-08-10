@@ -5,6 +5,8 @@
 <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.2.2/js/buttons.colVis.min.js"></script>
 </head>
 <body>
 <br>
@@ -17,12 +19,13 @@
   <col width="19%">
   <col width="9%">
   <col width="9%">
-  <col width="9%">
-  <col width="9%">
+  <col width="8%">
+  <col width="5%">
+  <col width="5%">
   <col width="4">
   <thead>
-  <tr>  <th></th><th id="left"> Dataset </th>  <th id="left"> Block </th> <th id="left"> Target </th> <th id="left"> Group </th>  <th id="center"> Basis </th>   <th id="center"> Age </th> <th id="center">  </th>     </tr>
-  <tr id="filterrow"> <th></th> <th id="left"> Dataset </th>  <th id="left"> Block </th> <th id="left"> Target </th> <th id="left"> Group </th> <th id="center"> Basis </th>   <th id="center">  </th> <th id="center">  </th>     </tr>
+  <tr>  <th></th><th id="left"> Dataset </th>  <th id="left"> Block </th> <th id="left"> Target </th> <th id="left"> Group </th> <th id="center"> Missing </th> <th id="center"> Basis </th>   <th id="center"> Age </th> <th id="center">  </th>     </tr>
+  <tr id="filterrow"> <th></th> <th id="isactive"> Dataset </th>  <th id="isactive"> Block </th> <th id="isactive"> Target </th> <th id="isactive"> Group </th>  <th>  </th> <th id="isactive"> Basis </th>   <th>  </th> <th>  </th>     </tr>
   </thead>
   <tfoot>
   </tfoot>
@@ -43,7 +46,7 @@ function format(value) {
 
 $(document).ready(function() {
     // Setup - add a text input to each footer cell
-    $('#tableall thead tr#filterrow th').each( function () {
+    $('#tableall thead tr#filterrow th#isactive').each( function () {
         var title = $(this).text();
         $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
     } );
@@ -52,7 +55,14 @@ $(document).ready(function() {
     var table = $('#tableall').DataTable({
       "orderCellsTop": true,
       "pageLength": 50,
-      "order": [[ 1, "asc" ]]
+      "order": [[ 1, "asc" ]],
+      // dom: 'Bfrtip',
+      buttons: [
+            {
+                extend: 'colvis',
+                columns: ':not(:first-child)'
+            }
+        ]
     });
  
     // Apply the search
