@@ -51,7 +51,8 @@ $(document).ready(function() {
     // DataTable
     var table = $('#tableall').DataTable({
       "orderCellsTop": true,
-      "pageLength": 50
+      "pageLength": 50,
+      "order": [[ 1, "asc" ]]
     });
  
     // Apply the search
