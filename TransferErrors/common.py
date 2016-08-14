@@ -52,6 +52,7 @@ class APIHandler():
     self.api = which
     self.method = method
     self.VERBOSE=False
+    self.url = None
   def __call__(self,params,flags=''):
     if self.method=='wget':
       return self.callWget(params,flags)
@@ -60,14 +61,14 @@ class APIHandler():
       return
   def callWget(self,params,flags=''):
     flags = ' --no-check-certificate '+flags
-    url = '"https://cmsweb.cern.ch/phedex/datasvc/json/prod/%s?'%(self.api)
+    self.url = '"https://cmsweb.cern.ch/phedex/datasvc/json/prod/%s?'%(self.api) # member variable so it can be checked after call
     for p in params:
       arg = params[p]
       param_str = '&%s=%s'%(p,str(arg))
-      url += param_str
-    url += '"'
+      self.url += param_str
+    self.url += '"'
     outputflag = '' if self.VERBOSE else ' > /dev/null 2>/dev/null'
-    cmd = 'wget %s %s %s'%(flags,url,outputflag)
+    cmd = 'wget %s %s %s'%(flags,self.url,outputflag)
     if self.VERBOSE: print cmd
     os.system(cmd)
 
@@ -92,6 +93,7 @@ class Subscription():
 
 class TMDBDataset():
   def __init__(self,n):
+    self.volume = 0
     self.name = n
     self.stuckBlocks = {}
     self.volumemissing = {} # doesn't have be to be filled for every Subscription if at block-level
