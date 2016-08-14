@@ -54,9 +54,11 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
   payload = common.getJson(bufferpath)['dataset']
   subscriptions = {} # dataset : {block:[common.Subscription]}
   volumemissing = {} # dataset : {site:vol} - only filled for dataset-level subscriptions
+  volume        = {} # dataset : volume
   for d in payload:
     dname = d['name']
     vol = 1.*d['bytes']
+    volume[dname] = vol
     if not (dname in subscriptions):
       subscriptions[dname] = {}
       volumemissing[dname] = {}
@@ -92,6 +94,7 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
       continue
 
     ds.volumemissing = volumemissing[dsname]
+    ds.volume = volume[dsname]
 
     emptyBlocks=set([])
     for blockname,block in ds.stuckBlocks.iteritems():
@@ -154,23 +157,30 @@ def addMissingFiles(stuck,bufferpath=''):
   # api.VERBOSE=True
   counter=0
   for dsname,ds in stuck.iteritems():
+    volumemissing = {} # site : vol
     for blockname,block in ds.stuckBlocks.iteritems():
       flags = ' -O %s'%bufferpath
       for t in block.targets:
+        if t.node not in volumemissing:
+          volumemissing[t.node] = 0
         counter+=1
         params = {'node':t.node, 'block':block.name.replace('#','%23')} 
         api(params,flags)
         try:
-          payload = common.getJson(bufferpath)['block'][0]['file'] # should only get one file back
+          payload = common.getJson(bufferpath)['block'][0]['file'] # should only get one block back
           for f in payload:
             t.missingfiles.add(f['name'])
             t.volumemissing += f['bytes']
+            volumemissing[t.node] += f['bytes']
         except IndexError:
-          print 'No missing files found!',counter
-          print '\t',
+          print '######################################'
+          print 'No missing files found for block with basis=%i!'%t.basis,counter
+          print api.url
           pprint.pprint(common.getJson(bufferpath))
-          print '\t',
           pprint.pprint(params)
+          print '######################################'
+    for n,v in volumemissing.iteritems():
+      ds.volumemissing[n] = 1.*v/ds.volume
 
 
 

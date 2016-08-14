@@ -20,7 +20,7 @@ def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
         newstring = newstring.replace('GROUP',t.group) 
         newstring = newstring.replace('BLOCKMISSING',"%.1f%%"%(100.*t.volumemissing/block.volume))
         if t.node in ds.volumemissing:
-          newstring = newstring.replace('DATASETMISSING',"%.1f%%"%(100.*ds.volumemissing[t.node]))
+          newstring = newstring.replace('DATASETMISSING',"%.3f%%"%(100.*ds.volumemissing[t.node]))
         else:
           newstring = newstring.replace('DATASETMISSING','-')
 
