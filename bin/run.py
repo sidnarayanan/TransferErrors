@@ -3,12 +3,20 @@
 import TransferErrors as TE
 import cPickle as pickle
 
-TE.getBlockArrive()
+print 'Getting block arrive'
+TE.getBlockArrive(skip=[0,-2])
+
+print 'Getting subscriptions'
 TE.getSubscriptions()
 # TE.getErrorLogs()
 
+print 'Parsing block arrive'
 stuck=TE.parseBlockArrive(threshold=7)
+
+print 'Filtering subscriptions'
 TE.filterSubscriptions(stuck)
+
+print 'Adding missing file info'
 TE.addMissingFiles(stuck)
 
 with open('stuck.pkl','wb') as pklfile:
