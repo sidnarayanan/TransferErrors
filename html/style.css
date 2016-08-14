@@ -7,6 +7,11 @@ body {
   line-height:      1.6em;
 }
 
+a.toggle-vos {
+  color: #800000;
+  text-decoration: none;
+}
+
 a:visited,
 a:link {
   color: #800000;

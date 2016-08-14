@@ -94,6 +94,7 @@ class TMDBDataset():
   def __init__(self,n):
     self.name = n
     self.stuckBlocks = {}
+    self.volumemissing = {} # doesn't have be to be filled for every Subscription if at block-level
 
 class TMDBBlock():
   def __init__(self,n):

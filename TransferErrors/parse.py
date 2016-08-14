@@ -53,10 +53,13 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
   # parse the subscriptions
   payload = common.getJson(bufferpath)['dataset']
   subscriptions = {} # dataset : {block:[common.Subscription]}
+  volumemissing = {} # dataset : {site:vol} - only filled for dataset-level subscriptions
   for d in payload:
     dname = d['name']
+    vol = 1.*d['bytes']
     if not (dname in subscriptions):
       subscriptions[dname] = {}
+      volumemissing[dname] = {}
     # dataset-level
     # pprint.pprint(d)
     if 'subscription' in d:
@@ -66,6 +69,7 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
         thisage = now-s['time_create']
         if thisage > threshold:
           subscriptions[dname][''].append( common.Subscription(site=s['node'],age=thisage,group=s['group']) )
+          volumemissing[dname][s['node']] = 1. - s['node_bytes']/vol
     #block-level
     if 'block' in d:
       for b in d['block']:
@@ -86,6 +90,8 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
     except KeyError:
       emptyDatasets.add(dsname)
       continue
+
+    ds.volumemissing = volumemissing[dsname]
 
     emptyBlocks=set([])
     for blockname,block in ds.stuckBlocks.iteritems():
@@ -146,10 +152,12 @@ def addMissingFiles(stuck,bufferpath=''):
     bufferpath = common.tmpdir + 'missingfiles.json'
   api = common.APIHandler('missingfiles')
   # api.VERBOSE=True
+  counter=0
   for dsname,ds in stuck.iteritems():
     for blockname,block in ds.stuckBlocks.iteritems():
       flags = ' -O %s'%bufferpath
       for t in block.targets:
+        counter+=1
         params = {'node':t.node, 'block':block.name.replace('#','%23')} 
         api(params,flags)
         try:
@@ -158,57 +166,11 @@ def addMissingFiles(stuck,bufferpath=''):
             t.missingfiles.add(f['name'])
             t.volumemissing += f['bytes']
         except IndexError:
-          print 'No missing files found!'
+          print 'No missing files found!',counter
+          print '\t',
           pprint.pprint(common.getJson(bufferpath))
-
-
-# def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
-#   if bufferpath=='':
-#     bufferpath_sub = common.tmpdir+'subscription.json'
-#     bufferpath_mis = common.tmpdir+'missingfiles.json'
-#   api_sub = common.APIHandler(which='subscriptions',method='wget')
-#   api_mis = common.APIHandler(which='missingfiles',method='wget')
-#   now = time()
-#   emptyDatasets=set([])
-#   for dsname,ds in stuckDatasets.iteritems():
-#     emptyBlocks=set([])
-#     for blockname,block in ds.stuckBlocks.iteritems():
-#       # first check when subscription was made
-#       flags = ' -O %s'%bufferpath_sub
-#       toRemove = set([])
-#       for t in block.targets:
-#         if 'X' in t.node:
-#           toRemove.add(t)
-#           continue
-#         time_create = now
-#         params = {'node':t.node, 'block':block.name.replace('#','%23')}
-#         api_sub(params,flags)
-#         payload = common.getJson(bufferpath_sub)
-#         if not payload:
-#           toRemove.add(t)
-#           continue
-#         payload = payload['dataset']
-#         try:
-#           time_create = int(payload[0]['block'][0]['subscription'][0]['time_create'])
-#         except:
-#           try:
-#             time_create = int(payload[0]['subscription'][0]['time_create'])
-#           except:
-#             toRemove.add(t)
-#             continue
-#         if now-time_create < threshold*common.sPerDay:
-#           toRemove.add(t)
-#           continue
-#       for t in toRemove:
-#         block.targets.remove(t)
-#       if len(block.targets)==0:
-#         emptyBlocks.add(blockname)
-#     for blockname in emptyBlocks:
-#       del ds.stuckBlocks[blockname]
-#     if len(ds.stuckBlocks)==0:
-#       emptyDatasets.add(dsname)
-#   for dsname in emptyDatasets:
-#     del stuckDatasets[dsname]
+          print '\t',
+          pprint.pprint(params)
 
 
 
