@@ -44,3 +44,28 @@ def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
       if 'Insert newlines here' in line:
         outfile.write(newrows)
 
+def makeCSV(stuckDatasets,outfilepath):
+  templatestring = 'DATASETNAME,BLOCKNAME,NODENAME,GROUP,BLOCKMISSING,DATASETMISSING,BASIS,AGE\n'
+  newrows = templatestring
+
+  for dsname in sorted(stuckDatasets):
+    ds = stuckDatasets[dsname]
+    for blockname,block in ds.stuckBlocks.iteritems():
+      blockname_ = '#' + blockname.split('#')[-1]
+      for t in block.targets:
+        newstring = templatestring
+        newstring = newstring.replace('DATASETNAME',dsname)
+        newstring = newstring.replace('BLOCKNAME',blockname_)
+        newstring = newstring.replace('NODENAME',str(t.node))
+        newstring = newstring.replace('BASIS',str(t.basis))
+        newstring = newstring.replace('AGE','%.1f'%(t.age/common.sPerDay))
+        newstring = newstring.replace('GROUP',t.group) 
+        newstring = newstring.replace('BLOCKMISSING',"%.1f%%"%(100.*t.volumemissing/block.volume))
+        if t.node in ds.volumemissing:
+          newstring = newstring.replace('DATASETMISSING',"%.3f%%"%(100.*ds.volumemissing[t.node]))
+        else:
+          newstring = newstring.replace('DATASETMISSING','-')
+        newrows += newstring
+
+  with open(outfilepath,'w') as outfile:
+    outfile.write(newrows)

@@ -14,7 +14,7 @@ def getBlockArrive(refresh=False,bufferpath_tmpl='',skip=[0]):
       continue
     bufferpath = bufferpath_tmpl%(str(iB).replace('-','m'))
     if not refresh:
-      if os.path.isfile(bufferpath) and (os.path.getmtime(bufferpath)-time() < common.sPerDay):
+      if os.path.isfile(bufferpath) and (time()-os.path.getmtime(bufferpath) < common.sPerDay):
         continue
     flags = '-O %s'%bufferpath
     params = {'basis':iB}
@@ -30,7 +30,7 @@ def getErrorLogs(refresh=False,bufferpath_tmpl='',skip=[]):
       continue
     bufferpath = bufferpath_tmpl%(site)
     if not refresh:
-      if os.path.isfile(bufferpath) and (os.path.getmtime(bufferpath)-time() < common.sPerDay):
+      if os.path.isfile(bufferpath) and (time()-os.path.getmtime(bufferpath) < common.sPerDay):
         continue
     flags = '-O %s'%bufferpath
     params = {'to':site}
@@ -44,7 +44,7 @@ def getSubscriptions(refresh=False,bufferpath_tmpl='',window=60):
   if window==0:
     since = 1
   if not refresh:
-      if os.path.isfile(bufferpath_tmpl) and (os.path.getmtime(bufferpath_tmpl)-time() < common.sPerDay):
+      if os.path.isfile(bufferpath_tmpl) and (time()-os.path.getmtime(bufferpath_tmpl) < common.sPerDay):
         return
   api = common.APIHandler(which='subscriptions',method='wget')
   api.VERBOSE=True

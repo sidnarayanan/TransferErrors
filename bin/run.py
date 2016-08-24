@@ -2,19 +2,26 @@
 
 import TransferErrors as TE
 import cPickle as pickle
+import argparse
+from sys import argv
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--refresh',action='store_true')
+
+refresh = parser.parse_args(argv[1:]).refresh
 
 print 'Getting block arrive'
-TE.getBlockArrive(skip=[0,-2])
+TE.getBlockArrive(skip=[0,-2],refresh=refresh)
 
 print 'Getting subscriptions'
-TE.getSubscriptions()
+TE.getSubscriptions(refresh=refresh,window=90)
 # TE.getErrorLogs()
 
 print 'Parsing block arrive'
-stuck=TE.parseBlockArrive(threshold=7)
+stuck=TE.parseBlockArrive(threshold=5)
 
 print 'Filtering subscriptions'
-TE.filterSubscriptions(stuck)
+TE.filterSubscriptions(stuck,threshold=5)
 
 print 'Adding missing file info'
 TE.addMissingFiles(stuck)
