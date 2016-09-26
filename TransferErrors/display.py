@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import common
+import json
+import time
 
 def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
   templatestring = '<tr data-hiddenval="HIDDEN"> <td class="details-control"></td>  <td> DATASETNAME </td> <td> BLOCKNAME </td> <td> NODENAME </td> <td> GROUP </td> <td id="center"> BLOCKMISSING </td> <td id="center"> DATASETMISSING </td> <td id="center"> BASIS </td> <td id="center"> AGE </td> <td> <a href="URL" target="_blank"> &#8599 </a></tr>\n'
@@ -43,6 +45,8 @@ def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
       outfile.write(line)
       if 'Insert newlines here' in line:
         outfile.write(newrows)
+      if 'Last modified' in line:
+        outfile.write(time.strftime('%Y-%m-%d\n',time.gmtime()))
 
 def makeCSV(stuckDatasets,outfilepath):
   templatestring = 'DATASETNAME,BLOCKNAME,NODENAME,GROUP,BLOCKMISSING,DATASETMISSING,BASIS,AGE\n'
@@ -69,3 +73,25 @@ def makeCSV(stuckDatasets,outfilepath):
 
   with open(outfilepath,'w') as outfile:
     outfile.write(newrows)
+
+def makeJson(stuckDatasets,outfilepath,basis):
+  d = {}
+  for dsname in sorted(stuckDatasets):
+    ds = stuckDatasets[dsname]
+    for blockname,block in ds.stuckBlocks.iteritems():
+      blockname_ = '#' + blockname.split('#')[-1]
+      for t in block.targets:
+        if t.basis==basis:
+          if dsname not in d:
+            d[dsname] = {}
+          if blockname_ not in d[dsname]:
+            d[dsname][blockname_] = {}
+          d[dsname][blockname_][t.node] = {
+            'AGE':t.age/common.sPerDay,
+            'GROUP':t.group,
+            'BLOCKMISSINGFRAC':t.volumemissing/block.volume,
+          }
+          if t.node in ds.volumemissing:
+            d[dsname][blockname_][t.node]['DATASETMISSINGFRAC'] = ds.volumemissing[t.node]
+  with open(outfilepath,'w') as outfile:
+    json.dump(d,outfile,sort_keys=True,indent=4, separators=(',', ': '))
