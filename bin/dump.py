@@ -19,7 +19,7 @@ basisMap = {
    1 : 1,
    2 : 6,
 }
-revMap = {v:k for k,v in basisMap.iteritems()}
+#revMap = {v:k for k,v in basisMap.iteritems()}
 
 hAge = root.TH1F('hAge','',10,7,60); hAge.GetXaxis().SetTitle('Days'); hAge.GetYaxis().SetTitle('Blocks'); hAge.SetStats(0); hAge.SetMinimum(0)
 hBasis = root.TH1F('hBasis','',7,0.5,7.5); hBasis.GetXaxis().SetTitle(''); hBasis.GetYaxis().SetTitle('Blocks'); hBasis.SetStats(0); hBasis.SetMinimum(0)

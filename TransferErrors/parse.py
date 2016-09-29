@@ -40,7 +40,8 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
         dataset.stuckBlocks[blockname] = stuckBlock
       stuckBlock.volume = block['bytes']
       for dest in block['destination']:
-        stuckBlock.targets.add(common.Subscription(dest['name'],iB))
+        if not('T3' in dest['name']):
+          stuckBlock.targets.add(common.Subscription(dest['name'],iB))
 
   return stuckDatasets 
 
