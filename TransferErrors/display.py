@@ -20,7 +20,11 @@ def makeBasicTable(stuckDatasets,templatefilepath,outfilepath):
         newstring = newstring.replace('BASIS',str(t.basis))
         newstring = newstring.replace('AGE','%.1f'%(t.age/common.sPerDay))
         newstring = newstring.replace('GROUP',t.group) 
-        newstring = newstring.replace('BLOCKMISSING',"%.1f%%"%(100.*t.volumemissing/block.volume))
+        try:
+          newstring = newstring.replace('BLOCKMISSING',"%.1f%%"%(100.*t.volumemissing/block.volume))
+        except ZeroDivisionError:
+          print "%s%s has block.volume=0?"%(dsname,blockname_)
+          newstring = newstring.replace('BLOCKMISSING','100.0%')
         if t.node in ds.volumemissing:
           newstring = newstring.replace('DATASETMISSING',"%.3f%%"%(100.*ds.volumemissing[t.node]))
         else:
@@ -64,7 +68,11 @@ def makeCSV(stuckDatasets,outfilepath):
         newstring = newstring.replace('BASIS',str(t.basis))
         newstring = newstring.replace('AGE','%.1f'%(t.age/common.sPerDay))
         newstring = newstring.replace('GROUP',t.group) 
-        newstring = newstring.replace('BLOCKMISSING',"%.1f%%"%(100.*t.volumemissing/block.volume))
+        try:
+          newstring = newstring.replace('BLOCKMISSING',"%.1f%%"%(100.*t.volumemissing/block.volume))
+        except ZeroDivisionError:
+          print "%s%s has block.volume=0?"%(dsname,blockname_)
+          newstring = newstring.replace('BLOCKMISSING','100.0%')
         if t.node in ds.volumemissing:
           newstring = newstring.replace('DATASETMISSING',"%.3f%%"%(100.*ds.volumemissing[t.node]))
         else:
@@ -86,10 +94,14 @@ def makeJson(stuckDatasets,outfilepath,basis):
             d[dsname] = {}
           if blockname_ not in d[dsname]:
             d[dsname][blockname_] = {}
+          try:
+            blockmissingfrac = t.volumemissing/block.volume
+          except ZeroDivisionError:
+            blockmissingfrac = 1
           d[dsname][blockname_][t.node] = {
             'AGE':t.age/common.sPerDay,
             'GROUP':t.group,
-            'BLOCKMISSINGFRAC':t.volumemissing/block.volume,
+            'BLOCKMISSINGFRAC':blockmissingfrac,
           }
           if t.node in ds.volumemissing:
             d[dsname][blockname_][t.node]['DATASETMISSINGFRAC'] = ds.volumemissing[t.node]

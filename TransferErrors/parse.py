@@ -72,7 +72,11 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
         thisage = now-s['time_create']
         if thisage > threshold:
           subscriptions[dname][''].append( common.Subscription(site=s['node'],age=thisage,group=s['group']) )
-          volumemissing[dname][s['node']] = 1. - s['node_bytes']/vol
+          try:
+            volumemissing[dname][s['node']] = 1. - s['node_bytes']/vol
+          except TypeError:
+            volumemissing[dname][s['node']] = 1.
+
     #block-level
     if 'block' in d:
       for b in d['block']:
