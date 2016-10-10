@@ -1,11 +1,13 @@
 parent_path=/afs/cern.ch/user/j/jpulidom/transferteam/scripts/TransferErrors-master
+www_path=/afs/cern.ch/user/j/jpulidom/www/
 cd $parent_path
 source ./setup.sh
-echo "pythonpath:" $PYTHONPATH
+#echo "pythonpath:" $PYTHONPATH
 python $parent_path/bin/run.py --refresh     # does all the API calls and puts stuff in stuck.pkl
 python $parent_path/bin/write.py    # parses stuck.pkl into a HTML table
-cp -f -R $WEBDIR/d3 /afs/cern.ch/user/j/jpulidom/www/
-cp -f -R $WEBDIR/data.csv /afs/cern.ch/user/j/jpulidom/www/
-cp -f -R $WEBDIR/display.html /afs/cern.ch/user/j/jpulidom/www/
-cp -f -R $WEBDIR/style.css /afs/cern.ch/user/j/jpulidom/www/
-cp -f -R $WEBDIR/table.html /afs/cern.ch/user/j/jpulidom/www/
+cp -f -R $WEBDIR/d3 $www_path
+cp -f -R $WEBDIR/data.csv $www_path
+cp -f -R $WEBDIR/display.html $www_path
+cp -f -R $WEBDIR/style.css $www_path
+cp -f -R $WEBDIR/table.html $www_path
+cp -f -R $WEBDIR/*.json $www_path
