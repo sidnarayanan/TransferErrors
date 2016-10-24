@@ -185,7 +185,11 @@ def addMissingFiles(stuck,bufferpath=''):
           pprint.pprint(params)
           print '######################################'
     for n,v in volumemissing.iteritems():
-      ds.volumemissing[n] = 1.*v/ds.volume
+      try:
+        ds.volumemissing[n] = 1.*v/ds.volume
+      except ZeroDivisionError:
+        print 'dataset=%s has volume=0?'%(dsname)
+        ds.volumemissing[n] = 0.
 
 
 
