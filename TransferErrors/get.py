@@ -38,6 +38,7 @@ def getErrorLogs(refresh=False,bufferpath_tmpl='',skip=[]):
 
 def getSubscriptions(refresh=False,bufferpath_tmpl='',window=60):
   # window is number of days back to look
+  dspattern = os.getenv('DATASETPATTERN')
   if bufferpath_tmpl=='':
     bufferpath_tmpl = common.tmpdir+'subs.json'
   since = time()-window*common.sPerDay
@@ -49,5 +50,5 @@ def getSubscriptions(refresh=False,bufferpath_tmpl='',window=60):
   api = common.APIHandler(which='subscriptions',method='wget')
   api.VERBOSE=True
   flags = ' -O %s'%bufferpath_tmpl
-  params = {'create_since':int(since), 'block':'/*/*/*%23*', 'collapse':'y','percent_max':100}
+  params = {'create_since':int(since), 'block':'%s%%23*'%(dspattern), 'collapse':'n','percent_max':100}
   api(params,flags)

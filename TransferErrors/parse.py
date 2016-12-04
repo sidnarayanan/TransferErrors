@@ -29,7 +29,7 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
       if now-time_create < threshold*common.sPerDay:
         continue 
       try:
-        dataset = stuckDatasets['datasetname']
+        dataset = stuckDatasets[datasetname]
       except KeyError:
         dataset = common.TMDBDataset(datasetname)
         stuckDatasets[datasetname] = dataset
@@ -38,6 +38,8 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
       except KeyError:
         stuckBlock = common.TMDBBlock(blockname)
         dataset.stuckBlocks[blockname] = stuckBlock
+      if datasetname=='/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer15wmLHEGS-MCRUN2_71_V1_ext2-v1/GEN-SIM':
+        print blockname,dataset.stuckBlocks
       stuckBlock.volume = block['bytes']
       for dest in block['destination']:
         if not('T3' in dest['name']):
