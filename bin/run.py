@@ -26,6 +26,7 @@ TE.filterSubscriptions(stuck,threshold=5)
 print 'Adding missing file info'
 TE.addMissingFiles(stuck)
 
+print 'Dumping'
 with open('stuck.pkl','wb') as pklfile:
   pickle.dump(stuck,pklfile)
 

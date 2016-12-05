@@ -38,8 +38,6 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
       except KeyError:
         stuckBlock = common.TMDBBlock(blockname)
         dataset.stuckBlocks[blockname] = stuckBlock
-      if datasetname=='/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer15wmLHEGS-MCRUN2_71_V1_ext2-v1/GEN-SIM':
-        print blockname,dataset.stuckBlocks
       stuckBlock.volume = block['bytes']
       for dest in block['destination']:
         if not('T3' in dest['name']):
@@ -157,6 +155,8 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
     #finally, remove empty datasets
     del stuckDatasets[dsname]
 
+DOMISSINGFILES=False
+
 def addMissingFiles(stuck,bufferpath=''):
   if bufferpath=='':
     bufferpath = common.tmpdir + 'missingfiles.json'
@@ -164,22 +164,34 @@ def addMissingFiles(stuck,bufferpath=''):
   # api.VERBOSE=True
   counter=0
   for dsname,ds in stuck.iteritems():
+    flags = ' -O %s'%bufferpath
+    params = {'block':dsname+'%23*'} 
+    if DOMISSINGFILES:
+      api(params,flags)
+      payload = common.getJson(bufferpath)['block']
     volumemissing = {} # site : vol
     for blockname,block in ds.stuckBlocks.iteritems():
-      flags = ' -O %s'%bufferpath
+      thispayload = None
+      if DOMISSINGFILES:
+        for pb in payload:
+          if pb['name']==blockname:
+            thispayload=pb
+            break
       for t in block.targets:
         if t.node not in volumemissing:
           volumemissing[t.node] = 0
+        if not DOMISSINGFILES:
+          volumemissing[t.node] += block.volume # assume the whole block is missing
+          continue
         counter+=1
-        params = {'node':t.node, 'block':block.name.replace('#','%23')} 
-        api(params,flags)
-        try:
-          payload = common.getJson(bufferpath)['block'][0]['file'] # should only get one block back
-          for f in payload:
-            t.missingfiles.add(f['name'])
-            t.volumemissing += f['bytes']
-            volumemissing[t.node] += f['bytes']
-        except IndexError:
+        if thispayload:
+          for f in thispayload['file']:
+            for m in f['missing']:
+              if m['node_name']==t.node:
+                t.missingfiles.add(f['name'])
+                t.volumemissing += f['bytes']
+                volumemissing[t.node] += f['bytes']
+        else:
           print '######################################'
           print 'No missing files found for block with basis=%i!'%t.basis,counter
           print api.url

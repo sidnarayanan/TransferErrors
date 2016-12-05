@@ -50,5 +50,5 @@ def getSubscriptions(refresh=False,bufferpath_tmpl='',window=60):
   api = common.APIHandler(which='subscriptions',method='wget')
   api.VERBOSE=True
   flags = ' -O %s'%bufferpath_tmpl
-  params = {'create_since':int(since), 'block':'%s%%23*'%(dspattern), 'collapse':'n','percent_max':100}
+  params = {'create_since':int(since), 'block':'%s%%23*'%(dspattern), 'collapse':'n','percent_max':99.999}
   api(params,flags)
