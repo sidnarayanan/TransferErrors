@@ -10,13 +10,6 @@ parser.add_argument('--refresh',action='store_true')
 
 refresh = parser.parse_args(argv[1:]).refresh
 
-print 'Getting block arrive'
-TE.getBlockArrive(skip=[0,-2],refresh=refresh)
-
-print 'Getting subscriptions'
-TE.getSubscriptions(refresh=refresh,window=90)
-# TE.getErrorLogs()
-
 print 'Parsing block arrive'
 stuck=TE.parseBlockArrive(threshold=5)
 

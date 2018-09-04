@@ -4,22 +4,22 @@ import common
 import json
 from time import time
 import pprint
+import os 
 
-def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
-  '''
-  bufferpath_tmpl contain %s => ..., m2, m1, 0, 1,...
-  only consider blocks at least threshold [days] old (to avoid new stuff)
-  '''
-  if bufferpath_tmpl=='':
-    bufferpath_tmpl = common.tmpdir+'blockarrive_%s.json'
+ba_api = common.APIHandler('blockarrive')
+el_api = common.APIHandler('errorlog')
+subs_api= common.APIHandler('subscriptions')
+mf_api = common.APIHandler('missingfiles')
 
+
+def parseBlockArrive(skip=[0,-2],threshold=0):
   stuckDatasets = {}
   now = time()
 
   for iB in xrange(-6,3):
     if iB in skip:
       continue
-    payload = common.getJson(bufferpath_tmpl%(str(iB).replace('-','m')))
+    payload = ba_api({'basis':iB})
     if not payload:
       continue
     for block in payload['block']:
@@ -42,17 +42,19 @@ def parseBlockArrive(bufferpath_tmpl='',skip=[0],threshold=0):
       for dest in block['destination']:
         if not('T3' in dest['name']):
           stuckBlock.targets.add(common.Subscription(dest['name'],iB))
-
   return stuckDatasets 
 
-def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
-  if bufferpath=='':
-    bufferpath = common.tmpdir+'subs.json'
+def filterSubscriptions(stuckDatasets,threshold=7):
   now = time()
   threshold *= common.sPerDay
 
   # parse the subscriptions
-  payload = common.getJson(bufferpath)['dataset']
+  params = {'create_since' :  now - 60*common.sPerDay,
+            'block' : os.getenv('DATASETPATTERN') + '%23*',
+            'collapse' : 'n',
+            'suspended' : 'n',
+            'percent_max' : 99.999}
+  payload = subs_api(params)['dataset']
   subscriptions = {} # dataset : {block:[common.Subscription]}
   volumemissing = {} # dataset : {site:vol} - only filled for dataset-level subscriptions
   volume        = {} # dataset : volume
@@ -158,17 +160,12 @@ def filterSubscriptions(stuckDatasets,bufferpath='',threshold=7):
 DOMISSINGFILES=False
 
 def addMissingFiles(stuck,bufferpath=''):
-  if bufferpath=='':
-    bufferpath = common.tmpdir + 'missingfiles.json'
-  api = common.APIHandler('missingfiles')
-  # api.VERBOSE=True
   counter=0
   for dsname,ds in stuck.iteritems():
     flags = ' -O %s'%bufferpath
     params = {'block':dsname+'%23*'} 
     if DOMISSINGFILES:
-      api(params,flags)
-      payload = common.getJson(bufferpath)['block']
+      payload = mf_api(params)
     volumemissing = {} # site : vol
     for blockname,block in ds.stuckBlocks.iteritems():
       thispayload = None
@@ -194,8 +191,8 @@ def addMissingFiles(stuck,bufferpath=''):
         else:
           print '######################################'
           print 'No missing files found for block with basis=%i!'%t.basis,counter
-          print api.url
-          pprint.pprint(common.getJson(bufferpath))
+          print missingfiles.url
+          pprint.pprint(payload)
           pprint.pprint(params)
           print '######################################'
     for n,v in volumemissing.iteritems():

@@ -5,10 +5,6 @@ from time import time
 import os
 
 def getBlockArrive(refresh=False,bufferpath_tmpl='',skip=[0]):
-  if bufferpath_tmpl=='':
-    bufferpath_tmpl = common.tmpdir+'blockarrive_%s.json'
-  api = common.APIHandler(which='blockarrive',method='wget')
-  api.VERBOSE=True
   for iB in xrange(-6,3):
     if iB in skip:
       continue

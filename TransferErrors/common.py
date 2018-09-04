@@ -2,10 +2,12 @@
 
 import os
 import json
+import urllib2
+import logging
 
-tmpdir = '/tmp/'
 workdir = os.environ['TRANSFERERRORS']+'/'
 webdir = os.environ['WEBDIR']+'/'
+logging.basicConfig(level=10, format='%(asctime)-15s %(message)s')
 
 siteNames = set([
      'T2_BE_IIHE','T2_ES_IFCA','T2_IT_Pisa','T2_RU_PNPI',
@@ -39,38 +41,29 @@ basis = {
 
 sPerDay=86400
 
-def getJson(fpath):
+def getJson(jsonfile):
   try:
-    with open(fpath) as jsonfile:
-      payload = json.load(jsonfile)['phedex']
+    payload = json.load(jsonfile)['phedex']
     return payload
-  except:
+  except Exception as e:
+    print str(e)
     return None
 
 class APIHandler():
-  def __init__(self,which,method='wget'):
+  def __init__(self,which,cache=True):
     self.api = which
-    self.method = method
     self.VERBOSE=False
     self.url = None
-  def __call__(self,params,flags=''):
-    if self.method=='wget':
-      return self.callWget(params,flags)
-    else:
-      print 'ERROR [TransferErrors.APIHandler]: Method %s is not supported yet'%(self.method)
-      return
-  def callWget(self,params,flags=''):
-    flags = ' --no-check-certificate '+flags
-    self.url = '"https://cmsweb.cern.ch/phedex/datasvc/json/prod/%s?'%(self.api) # member variable so it can be checked after call
+  def __call__(self,params):
+    self.url = 'http://cmsweb.cern.ch/phedex/datasvc/json/prod/%s?'%(self.api) # member variable so it can be checked after call
     for p in params:
       arg = params[p]
       param_str = '&%s=%s'%(p,str(arg))
       self.url += param_str
-    self.url += '"'
-    outputflag = '' if self.VERBOSE else ' > /dev/null 2>/dev/null'
-    cmd = 'wget %s %s %s'%(flags,self.url,outputflag)
-    if self.VERBOSE: print cmd
-    os.system(cmd)
+    logging.debug(self.url)
+    payload = getJson(urllib2.urlopen(self.url))
+    logging.debug('...retrieved')
+    return payload
 
 class Site():
   def __init__(self):
